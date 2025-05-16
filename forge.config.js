@@ -11,7 +11,11 @@ module.exports = {
     osxSign: {},
     osxNotarize: {
       tool: 'notarytool',
-    }
+    },
+    darwinDarkModeSupport: true,
+    appBundleId: 'com.toolbox.app',
+    appCategoryType: 'public.app-category.utilities',
+    icon: './images/icon/logo'
   },
   // 允许跨平台构建
   makers: [
@@ -34,12 +38,13 @@ module.exports = {
       platforms: ['darwin'],
       config: {
         format: 'ULFO',
+        icon: './images/icon/logo.icns',
         contents: [
           {
             x: 130,
             y: 220,
             type: 'file',
-            path: 'Toolbox.app'
+            path: './out/Toolbox-darwin-arm64/Toolbox.app'
           },
           {
             x: 410,
@@ -47,7 +52,15 @@ module.exports = {
             type: 'link',
             path: '/Applications'
           }
-        ]
+        ],
+        background: '#3a506b',
+        backgroundColor: '#3a506b',
+        window: {
+          size: {
+            width: 540,
+            height: 380
+          }
+        }
       }
     }
   ],

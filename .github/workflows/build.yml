@@ -39,15 +39,29 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Debug - List directories before build
+        run: |
+          ls -la
+          mkdir -p out/Toolbox-darwin-arm64/
       - name: Build macOS app
-        run: npm run make
+        run: npm run package
+      - name: Debug - Check output directories
+        run: |
+          ls -la out/
+          find . -name "*.app" -type d
+      - name: Create ZIP for macOS
+        run: |
+          cd out
+          zip -r Toolbox-mac.zip .
+          cd ..
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-app
           path: |
-            out/make/zip/darwin/x64/*.zip
-            out/make/dmg/*.dmg
+            out/Toolbox-mac.zip
+            out/**/*.zip
+            out/**/*.dmg
 
   release:
     needs: [build-windows, build-macos]
