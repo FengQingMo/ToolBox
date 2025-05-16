@@ -1,61 +1,75 @@
-# Toolbox
+# Toolbox (工具箱)
 
-A modern utility toolkit application built with Vue.js and Electron.
+这是一个集合了实用工具和有趣功能的桌面应用程序，使用Vue.js和Electron构建。作为个人项目，我会持续更新和添加新的工具。
 
-## Features
+## 安装建议
 
-- Modern minimalist UI with dark mode support
-- Organized tools by category
-- Responsive and intuitive interface
-- Cross-platform support (Windows, macOS, Linux)
+**重要提示：** 建议将应用安装在C盘以外的其他分区（如D盘、E盘等），这样即使重装系统也不会丢失数据和设置。
 
-## Development
+## 主要功能
 
-### Prerequisites
+- 密码管理器：安全存储各种账号密码
+- 二维码生成器：快速生成自定义样式的二维码
+- 暗黑/明亮模式切换：护眼模式，适应不同使用环境
+
+## 即将添加的功能
+
+持续关注此项目，我将不断添加更多实用工具：
+
+- 文本编辑器
+- 图片处理工具
+- 网络工具
+- 系统优化工具
+- 更多实用小工具...
+
+## 数据存储
+
+应用数据保存在安装目录的 `data`文件夹中：
+
+- 密码数据：`data/passwords/`
+- 生成的二维码：`data/qrcodes/`
+- 应用日志：`data/app.log`
+
+## 开发信息
+
+### 环境要求
 
 - Node.js (>= 14.x)
 - npm (>= 6.x)
 
-### Setup
+### 本地开发
 
-1. Clone the repository
+1. 克隆仓库
+
 ```
-git clone https://github.com/yourusername/toolbox.git
+git clone https://github.com/FengQingMo/ToolBox.git
 cd toolbox
 ```
 
-2. Install dependencies
+2. 安装依赖
+
 ```
 npm install
 ```
 
-3. Run in development mode
+3. 运行开发环境
+
 ```
 npm run electron:dev
 ```
 
-This will start both the Vue.js development server and launch the Electron application.
+### 构建应用
 
-### Building
-
-To build the application for production:
+构建生产版本：
 
 ```
 npm run electron:build
 ```
 
-This will create distributable packages in the `build` directory.
+## 反馈与贡献
 
-## UI Design Details
+如果你有任何建议或发现了问题，欢迎提交issue或联系我。
 
-- Primary color: #2B73FF (Tech Blue)
-- Success color: #00C853 (Safe Green)
-- Warning color: #FF5252 (Alert Red)
-- Sidebar width: 200px fixed
-- Modern icons with 2px stroke
-- Card-based tool layout with hover effects
-- Consistent spacing and typography
-
-## License
+## 许可证
 
 MIT
