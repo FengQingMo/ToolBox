@@ -1,0 +1,77 @@
+{
+  "author": "风清默",
+  "description": "工具箱",
+  "name": "toolbox",
+  "private": true,
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "dev": "vite",
+    "build": "electron-packager ./ Toolbox --win --arch=x64 --out ../outputs --electron-zip-dir=../electron-zip --icon=logo.ico --overwrite --extra-resource=./resources/bin/",
+    "electron:dev": "concurrently \"npm run dev\" \"electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.11",
+    "color": "^5.0.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "qrcode": "^1.5.4",
+    "uuid": "^9.0.1",
+    "vue": "^3.5.13",
+    "widget-qrcode": "^1.0.4"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
+    "@electron-forge/plugin-fuses": "^7.8.1",
+    "@electron-forge/publisher-github": "^7.8.1",
+    "@electron/fuses": "^1.8.0",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "concurrently": "^8.2.0",
+    "electron": "^36.2.0",
+    "electron-packager": "^15.3.0",
+    "vite": "^6.3.5"
+  },
+  "build": {
+    "appId": "com.toolbox.app",
+    "productName": "Toolbox",
+    "directories": {
+      "output": "build"
+    },
+    "win": {
+      "directories": {
+        "output": "build"
+      },
+      "nsis": {
+        "oneClick": false,
+        "perMachine": true,
+        "allowElevation": true,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true,
+        "shortcutName": "Toolbox"
+      },
+      "icon": "logo.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
+  }
+}
