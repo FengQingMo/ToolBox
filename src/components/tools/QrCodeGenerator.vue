@@ -1,15 +1,15 @@
 <template>
-  <div class="wrapper">
-    <div class="mod-bg">
+  <div class="wrapper" :class="{ 'dark-mode': darkMode }">
+    <div class="mod-bg" :style="{ backgroundColor: darkMode ? '#1a1a1a' : '#fff' }">
       <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
         <defs>
           <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
         </defs>
         <g class="parallax">
-          <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.4)"></use>
-          <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.6)"></use>
-          <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.2)"></use>
-          <use xlink:href="#gentle-wave" x="48" y="7" fill="rgba(255,255,255,1)"></use>
+          <use xlink:href="#gentle-wave" x="48" y="0" :fill="darkMode ? 'rgba(40,40,40,0.4)' : 'rgba(255,255,255,0.4)'" class="wave-fill wave-1"></use>
+          <use xlink:href="#gentle-wave" x="48" y="3" :fill="darkMode ? 'rgba(50,50,50,0.6)' : 'rgba(255,255,255,0.6)'" class="wave-fill wave-2"></use>
+          <use xlink:href="#gentle-wave" x="48" y="5" :fill="darkMode ? 'rgba(60,60,60,0.2)' : 'rgba(255,255,255,0.2)'" class="wave-fill wave-3"></use>
+          <use xlink:href="#gentle-wave" x="48" y="7" :fill="darkMode ? 'rgba(30,30,30,1)' : 'rgba(255,255,255,1)'" class="wave-fill wave-4"></use>
         </g>
       </svg>
     </div>
@@ -99,6 +99,17 @@
 <script>
 import '../../components/widget-qrcode-main/dist/widget-qrcode.min.js'
 
+// Add dark mode class to html element when component mounts if darkMode prop is true
+function updateDarkModeClasses(isDark) {
+  if (isDark) {
+    document.documentElement.classList.add('dark-mode')
+    document.body.classList.add('dark-mode')
+  } else {
+    document.documentElement.classList.remove('dark-mode')
+    document.body.classList.remove('dark-mode')
+  }
+}
+
 // Import images
 import girlBg from '../../assets/image/bg/girl.jpeg'
 import monkeyBg from '../../assets/image/bg/monkey.jpeg'
@@ -109,16 +120,26 @@ import octopusLogo from '../../assets/image/logo/octopus.png'
 
 export default {
   name: 'QRCode',
+  props: {
+    darkMode: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       qrValue: 'https://passer-by.com/',
       currentStyleIndex: 0,
       presetStyles: [
         {
+          template:'default',
+          level:'M'
+        },
+        {
           name: '融合风格-女孩',
           template: 'fusion',
           level: 'M',
-          backgroundImage: girlBg,
+          backgroundImage: '../../assets/image/bg/girl.jpeg',
           backgroundColor: '#ffcc60'
         },
         {
@@ -208,6 +229,16 @@ export default {
       return this.presetStyles[this.currentStyleIndex]
     }
   },
+  mounted() {
+    // Update dark mode classes when component mounts
+    updateDarkModeClasses(this.darkMode)
+  },
+  watch: {
+    darkMode(newVal) {
+      // Update dark mode classes when darkMode prop changes
+      updateDarkModeClasses(newVal)
+    }
+  },
   methods: {
     selectStyle(index) {
       this.currentStyleIndex = index
@@ -244,23 +275,107 @@ export default {
 </script>
 
 <style>
-@import '/src/components/widget-qrcode-main/static/style/index.css';
+/* Reset and base styles */
+html{color:#000;background:#FFF}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}
+table{border-collapse:collapse;border-spacing:0}
+fieldset,img{border:0}
+address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}
+ol,ul{list-style:none}
+caption,th{text-align:left}
+h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}
+q:before,q:after{content:''}
+abbr,acronym{border:0;font-variant:normal}
+sup{vertical-align:text-top}
+sub{vertical-align:text-bottom}
+input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit}
+legend{color:#000}
 
+body {
+  height: 100%;
+  font-family: Arial, Helvetica, "Microsoft Yahei";
+  color: rgb(110, 119, 129);
+}
+
+/* Core styles with dark mode overrides */
 .wrapper {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #fff;
+  background-color: transparent !important;
   overflow-y: auto;
+}
+
+.dark-mode.wrapper {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode {
+  color: #e0e0e0;
+}
+
+html.dark-mode, body.dark-mode {
+  background-color: #1a1a1a !important;
+}
+
+.dark-mode .container, .dark-mode .inner {
+  background-color: transparent !important;
 }
 
 .mod-bg {
   position: absolute;
-  top: 0;
   left: 0;
-  right: 0;
-  height: 200px;
-  z-index: 1;
+  top: 0;
+  height: 550px;
+  width: 100%;
+  z-index: -1;
+  background: url('../image/bg.svg') center top repeat-x;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+.mod-bg:after {
+  display: block;
+  width: 100%;
+  height: 360px;
+  content: '';
+  margin-bottom: -240px
+}
+.mod-bg .waves {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  min-height: 80px;
+  max-height: 120px;
+  z-index: 0
+}
+.mod-bg .parallax>use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.1) infinite
+}
+.mod-bg .parallax>use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s
+}
+.mod-bg .parallax>use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s
+}
+.mod-bg .parallax>use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s
+}
+.mod-bg .parallax>use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s
+}
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0)
+  }
+  100% {
+    transform: translate3d(85px, 0, 0)
+  }
 }
 
 .container {
@@ -271,7 +386,7 @@ export default {
 }
 
 .mod-panel {
-  background: #fff;
+  background: transparent;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
@@ -293,6 +408,7 @@ export default {
   font-size: 24px;
   font-weight: 500;
   color: #333;
+  transition: color 0.3s ease;
 }
 
 .bd {
@@ -320,6 +436,10 @@ export default {
   background-color: #f9f9f9;
   border-radius: 8px;
   min-height: 350px;
+}
+
+.dark-mode .view-box {
+  background-color: #2c2c2c;
 }
 
 .qrcode-container {
@@ -374,12 +494,14 @@ export default {
   border: 1px solid #eaeaea;
   border-radius: 8px;
   overflow: hidden;
+  transition: border-color 0.3s ease;
 }
 
 .c-hd {
   background-color: #f5f5f5;
   padding: 10px 15px;
   border-bottom: 1px solid #eaeaea;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .c-hd .title {
@@ -388,6 +510,7 @@ export default {
   color: #333;
   margin: 0;
   display: block;
+  transition: color 0.3s ease;
 }
 
 .c-bd {
@@ -405,6 +528,7 @@ export default {
 .input-title span {
   font-size: 14px;
   color: #666;
+  transition: color 0.3s ease;
 }
 
 .input-content {
@@ -419,6 +543,7 @@ export default {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   font-size: 14px;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .input-content label {
@@ -428,6 +553,7 @@ export default {
   margin-right: 10px;
   margin-bottom: 5px;
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .input-content input[type="radio"] {
@@ -443,11 +569,12 @@ export default {
   cursor: pointer;
 }
 
-/* 高级选项样式 */
+/* Advanced options styles */
 .advanced-options {
   margin-top: 20px;
   border-top: 1px solid #eaeaea;
   padding-top: 15px;
+  transition: border-color 0.3s ease;
 }
 
 .option-group {
@@ -460,6 +587,7 @@ export default {
   font-size: 14px;
   color: #666;
   margin-bottom: 5px;
+  transition: color 0.3s ease;
 }
 
 .option-group input[type="text"] {
@@ -469,6 +597,7 @@ export default {
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .color-input {
@@ -483,9 +612,10 @@ export default {
   padding: 0;
   background: none;
   cursor: pointer;
+  transition: border-color 0.3s ease;
 }
 
-/* 文件上传样式 */
+/* File upload styles */
 .file-input-group {
   display: flex;
   gap: 10px;
@@ -518,31 +648,6 @@ export default {
 
 .upload-btn:hover {
   background-color: #e6e6e6;
-}
-
-@media (max-width: 800px) {
-  .container {
-    padding: 10px;
-  }
-  
-  .file-input-group {
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .upload-btn {
-    width: 100%;
-  }
-  
-  .download-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .download-btn {
-    width: 100%;
-    justify-content: center;
-  }
 }
 
 .style-grid {
@@ -584,6 +689,32 @@ export default {
   font-size: 12px;
   color: #666;
   text-align: center;
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 800px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .file-input-group {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .upload-btn {
+    width: 100%;
+  }
+  
+  .download-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .download-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -591,5 +722,94 @@ export default {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 12px;
   }
+}
+
+/* Dark mode styles */
+.dark-mode.wrapper * {
+  background-color: inherit;
+}
+
+.dark-mode .mod-bg {
+  background: #1a1a1a url('../image/bg.svg') center top repeat-x;
+}
+
+.dark-mode .mod-bg .wave-fill.wave-1 {
+  fill: rgba(40, 40, 40, 0.4);
+}
+
+.dark-mode .mod-bg .wave-fill.wave-2 {
+  fill: rgba(50, 50, 50, 0.6);
+}
+
+.dark-mode .mod-bg .wave-fill.wave-3 {
+  fill: rgba(60, 60, 60, 0.2);
+}
+
+.dark-mode .mod-bg .wave-fill.wave-4 {
+  fill: rgba(30, 30, 30, 1);
+}
+
+.dark-mode .title h1 {
+  color: #e0e0e0;
+}
+
+.dark-mode .view-box {
+  background-color: #2c2c2c;
+}
+
+.dark-mode .box {
+  border-color: #3a3a3a;
+}
+
+.dark-mode .c-hd {
+  background-color: #333333;
+  border-bottom-color: #3a3a3a;
+}
+
+.dark-mode .c-hd .title {
+  color: #e0e0e0;
+}
+
+.dark-mode .input-title span {
+  color: #b0b0b0;
+}
+
+.dark-mode .input-content input[type="search"] {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .style-name {
+  color: #b0b0b0;
+}
+
+.dark-mode .style-item:hover {
+  background: #2c3e50;
+  border-color: #3498db;
+}
+
+.dark-mode .style-item.active {
+  background: #2c3e50;
+  border-color: #3498db;
+}
+
+.dark-mode .upload-btn {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #3a3a3a;
+}
+
+.dark-mode .upload-btn:hover {
+  background-color: #444444;
+}
+
+/* Dark mode button styles */
+.dark-mode .download-btn {
+  background-color: #0e5da2;
+}
+
+.dark-mode .download-btn:hover {
+  background-color: #0a4980;
 }
 </style>

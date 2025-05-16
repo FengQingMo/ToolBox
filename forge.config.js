@@ -2,6 +2,55 @@ const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
+  packagerConfig: {
+    asar: true,
+    executableName: 'Toolbox',
+    extraResource: [
+      './resources/bin/'
+    ],
+    osxSign: {},
+    osxNotarize: {
+      tool: 'notarytool',
+    }
+  },
+  // 允许跨平台构建
+  makers: [
+    {
+      name: '@electron-forge/maker-squirrel',
+      config: {
+        name: 'Toolbox',
+        authors: '风清默',
+        description: '工具箱',
+        noMsi: true,
+        setupExe: 'Toolbox-Setup.exe'
+      }
+    },
+    {
+      name: '@electron-forge/maker-zip',
+      platforms: ['darwin', 'win32'],
+    },
+    {
+      name: '@electron-forge/maker-dmg',
+      platforms: ['darwin'],
+      config: {
+        format: 'ULFO',
+        contents: [
+          {
+            x: 130,
+            y: 220,
+            type: 'file',
+            path: 'Toolbox.app'
+          },
+          {
+            x: 410,
+            y: 220,
+            type: 'link',
+            path: '/Applications'
+          }
+        ]
+      }
+    }
+  ],
   publishers: [
     {
       name: '@electron-forge/publisher-github',
@@ -15,28 +64,7 @@ module.exports = {
       }
     }
   ],
-  packagerConfig: {
-    asar: true,
-  },
   rebuildConfig: {},
-  makers: [
-    {
-      name: '@electron-forge/maker-squirrel',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
-    },
-    {
-      name: '@electron-forge/maker-deb',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    },
-  ],
   plugins: [
     {
       name: '@electron-forge/plugin-auto-unpack-natives',

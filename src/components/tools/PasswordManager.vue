@@ -1,12 +1,15 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
+import MessageService from '../../utils/message.js';
+import { isElectronEnv, safeElectronCall } from '../../utils/helper.js';
 
 // 状态
 const passwords = ref([]);
 const showAddForm = ref(false);
 const editingPasswordId = ref(null);
 const searchQuery = ref('');
+const isElectron = ref(!!window.electron);
 
 // 新密码表单
 const newPassword = ref({
@@ -57,13 +60,35 @@ const loadPasswords = async () => {
 const savePasswords = async () => {
   try {
     if (window.electron) {
-      await window.electron.savePasswords(passwords.value);
+      console.log('准备保存密码，数量:', passwords.value.length);
+      // 确保保存的是纯数据对象，没有额外的Vue响应式属性
+      const passwordsToSave = passwords.value.map(pwd => ({
+        id: pwd.id || '',
+        title: pwd.title || '',
+        username: pwd.username || '',
+        password: pwd.password || '',
+        website: pwd.website || '',
+        notes: pwd.notes || '',
+        createdAt: pwd.createdAt || new Date().toISOString(),
+        updatedAt: pwd.updatedAt || new Date().toISOString()
+      }));
+      
+      const result = await window.electron.savePasswords(passwordsToSave);
+      
+      // 检查结果
+      if (result && result.success === false) {
+        throw new Error(result.error || '保存失败');
+      }
+      
+      console.log('密码保存成功');
     } else {
       // 浏览器环境，保存到localStorage
-      localStorage.setItem('passwords', JSON.stringify(passwords.value));
+      const passwordsToSave = JSON.stringify(passwords.value);
+      localStorage.setItem('passwords', passwordsToSave);
     }
   } catch (error) {
     console.error('保存密码失败:', error);
+    MessageService.error('保存失败', { message: `无法保存密码: ${error.message}` });
   }
 };
 
@@ -167,9 +192,66 @@ const generatePassword = () => {
   newPassword.value.password = password;
 };
 
+// 打开密码目录
+const openPasswordDirectory = async () => {
+  console.log('[DEBUG] 开始执行打开目录函数');
+  
+  try {
+    // 使用安全调用方法
+    const dirPath = await safeElectronCall(
+      async (api) => await api.getPasswordStoragePath(),
+      null,
+      MessageService
+    );
+    
+    console.log('[DEBUG] 获取到的路径:', dirPath);
+    
+    if (!dirPath) {
+      MessageService.error('路径错误', {
+        message: '无法获取密码存储目录路径'
+      });
+      return;
+    }
+    
+    const result = await safeElectronCall(
+      async (api) => await api.openPathInExplorer(dirPath),
+      { success: false },
+      MessageService
+    );
+    
+    if (!result || !result.success) {
+      const errorMsg = result?.error || '未知错误';
+      MessageService.error('打开失败', {
+        message: `打开目录失败: ${errorMsg}`
+      });
+    } else {
+      MessageService.info('已打开', {
+        message: '密码存储目录已打开'
+      });
+    }
+  } catch (error) {
+    console.error('[DEBUG] 发生异常:', error);
+    console.error('[DEBUG] 错误堆栈:', error.stack);
+    MessageService.error('系统错误', {
+      message: `打开目录时出错: ${error?.message || String(error)}`
+    });
+  }
+};
+
 // 生命周期钩子
 onMounted(() => {
   loadPasswords();
+  
+  // 检查electron对象
+  console.log('[DEBUG] 组件挂载时检查 - window.electron:', !!window.electron);
+  if (window.electron) {
+    console.log('[DEBUG] electron对象的属性:', Object.keys(window.electron));
+  } else {
+    console.log('[DEBUG] window.electron对象不存在');
+  }
+  
+  // 重新检查isElectron
+  isElectron.value = !!window.electron;
 });
 </script>
 
@@ -187,12 +269,23 @@ onMounted(() => {
           />
         </div>
         
-        <button 
-          class="btn btn-primary" 
-          @click="showAddForm = !showAddForm; editingPasswordId = null;"
-        >
-          {{ showAddForm ? '取消' : '添加密码' }}
-        </button>
+        <div class="action-buttons">
+              
+          <button 
+            class="btn btn-secondary"
+            @click="openPasswordDirectory"
+       
+          >
+            <span class="folder-icon">📁</span> 打开存储目录
+          </button>
+          <button 
+            class="btn btn-primary" 
+            @click="showAddForm = !showAddForm; editingPasswordId = null;"
+          >
+            {{ showAddForm ? '取消' : '添加密码' }}
+          </button>
+      
+        </div>
       </div>
     </div>
     
@@ -409,6 +502,12 @@ onMounted(() => {
   margin-top: var(--spacing-md);
 }
 
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
 .search-box {
   flex: 1;
   max-width: 400px;
@@ -613,5 +712,43 @@ onMounted(() => {
 
 .updated-at {
   font-size: 11px;
+}
+
+.btn-folder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.btn-folder:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--primary-color);
+}
+
+.folder-icon {
+  font-size: 18px;
+}
+
+.folder-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--primary-color);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.folder-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
 }
 </style> 

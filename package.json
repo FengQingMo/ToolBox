@@ -3,23 +3,38 @@
   "description": "工具箱",
   "name": "toolbox",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "type": "module",
   "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FengQingMo/ToolBox.git"
+  },
   "scripts": {
     "start": "electron-forge start",
     "dev": "vite",
-    "build": "electron-packager ./ Toolbox --win --arch=x64 --out ../outputs --electron-zip-dir=../electron-zip --icon=logo.ico --overwrite --extra-resource=./resources/bin/",
+    "build": "electron-packager ./ Toolbox --win --arch=x64 --out ../outputs --electron-zip-dir=../electron-zip --overwrite --extra-resource=./resources/bin/",
     "electron:dev": "concurrently \"npm run dev\" \"electron .\"",
     "electron:build": "vite build && electron-builder",
     "postinstall": "electron-builder install-app-deps",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "publish:win": "electron-forge publish --platform=win32",
+    "release": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags",
+    "release:major": "npm version major && git push && git push --tags",
+    "update-lockfile": "npm i --package-lock-only"
   },
   "dependencies": {
     "@electron/remote": "^2.0.11",
     "color": "^5.0.0",
+    "electron-is-dev": "^3.0.1",
+    "electron-log": "^5.4.0",
     "electron-squirrel-startup": "^1.0.1",
+    "electron-util": "^0.18.1",
     "qrcode": "^1.5.4",
+    "update-electron-app": "^3.1.1",
     "uuid": "^9.0.1",
     "vue": "^3.5.13",
     "widget-qrcode": "^1.0.4"
@@ -27,6 +42,7 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
     "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-dmg": "^7.8.1",
     "@electron-forge/maker-rpm": "^7.8.1",
     "@electron-forge/maker-squirrel": "^7.8.1",
     "@electron-forge/maker-zip": "^7.8.1",
@@ -37,12 +53,15 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "concurrently": "^8.2.0",
     "electron": "^36.2.0",
+    "electron-builder": "^26.0.12",
     "electron-packager": "^15.3.0",
+    "electron-updater": "^6.6.2",
     "vite": "^6.3.5"
   },
   "build": {
     "appId": "com.toolbox.app",
     "productName": "Toolbox",
+    "copyright": "Copyright © 2025 ${author}",
     "directories": {
       "output": "build"
     },
@@ -58,7 +77,6 @@
         "createStartMenuShortcut": true,
         "shortcutName": "Toolbox"
       },
-      "icon": "logo.ico",
       "target": [
         "nsis"
       ]
@@ -71,6 +89,70 @@
     "linux": {
       "target": [
         "AppImage"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Toolbox"
+    }
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "Toolbox",
+            "authors": "风清默",
+            "description": "工具箱",
+            "noMsi": true,
+            "setupExe": "Toolbox-Setup.exe"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin",
+            "win32"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "format": "ULFO",
+            "contents": [
+              {
+                "x": 130,
+                "y": 220,
+                "type": "file",
+                "path": "Toolbox.app"
+              },
+              {
+                "x": 410,
+                "y": 220,
+                "type": "link",
+                "path": "/Applications"
+              }
+            ]
+          }
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "FengQingMo",
+              "name": "ToolBox"
+            },
+            "prerelease": false,
+            "draft": true
+          }
+        }
       ]
     }
   }

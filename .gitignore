@@ -6,11 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.vscode
+
 node_modules
 dist
 dist-ssr
 *.local
+out/
 
 # Editor directories and files
 .vscode/*
@@ -23,5 +24,5 @@ dist-ssr
 *.sln
 *.sw?
 
-out/
-/Toolbox.iml
+# Electron forge output
+/out/

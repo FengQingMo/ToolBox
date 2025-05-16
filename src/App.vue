@@ -5,12 +5,16 @@ import StatusBar from './components/StatusBar.vue';
 import ToolGrid from './components/ToolGrid.vue';
 import PasswordManager from './components/tools/PasswordManager.vue';
 import QrCodeGenerator from './components/tools/QrCodeGenerator.vue';
+import MessageExample from './components/examples/MessageExample.vue';
+import { detectDarkMode, isElectronEnv, getElectronAPI, checkElectronEnv } from './utils/helper.js';
+import MessageService from './utils/message.js';
 
 // App state
-const darkMode = ref(false);
+const darkMode = ref(detectDarkMode());
 const currentCategory = ref('all');
 const searchQuery = ref('');
 const appInfo = ref({ version: '0.1.0', platform: 'web' });
+const electronAPI = getElectronAPI();
 
 // 活跃工具管理
 const activeTools = ref([]);
@@ -18,28 +22,31 @@ const currentTool = ref(null);
 
 // 检查系统是否为暗黑模式
 onBeforeMount(() => {
-  // 检查是否在Electron环境中
-  if (window.electron) {
-    darkMode.value = window.electron.isDarkMode();
-    document.body.classList.toggle('dark-mode', darkMode.value);
-  } else {
-    // 浏览器环境中检查暗黑模式
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      darkMode.value = true;
-      document.body.classList.add('dark-mode');
-    }
-  }
+  // 设置暗黑模式状态
+  darkMode.value = detectDarkMode();
+  document.body.classList.toggle('dark-mode', darkMode.value);
 });
 
 // 获取应用信息
 onMounted(async () => {
-  if (window.electron) {
+  // 检查Electron环境
+  const electronAvailable = checkElectronEnv(MessageService);
+  
+  if (electronAvailable) {
     try {
-      appInfo.value = await window.electron.getAppInfo();
+      appInfo.value = await electronAPI.getAppInfo();
       console.log('App info:', appInfo.value);
     } catch (error) {
       console.error('Failed to get app info:', error);
+      MessageService.error('获取应用信息失败', {
+        message: error.message || '未知错误'
+      });
     }
+  } else {
+    console.log('Running in browser environment');
+    MessageService.info('浏览器环境', {
+      message: '当前运行在浏览器环境中，部分功能将不可用'
+    });
   }
 
   // 从本地存储加载活跃工具
@@ -147,6 +154,7 @@ const breadcrumbText = computed(() => {
     <SidebarNav 
       :current-category="currentCategory"
       :active-tools="activeTools"
+      :dark-mode="darkMode"
       @change-category="changeCategory" 
       @open-tool="openTool"
     />
@@ -162,12 +170,15 @@ const breadcrumbText = computed(() => {
           v-if="showToolGrid"
           :category="currentCategory" 
           :search-query="searchQuery"
+          :dark-mode="darkMode"
           @open-tool="openTool"
+          @toggle-dark-mode="toggleDarkMode"
         />
         
         <!-- 工具组件 -->
         <PasswordManager v-if="currentTool === 'password-manager'" />
         <QrCodeGenerator v-if="currentTool === 'qrcode-generator'" />
+        <MessageExample v-if="currentTool === 'message-example'" />
       </div>
       
       <!-- 底部状态栏 -->

@@ -8,7 +8,11 @@ const props = defineProps({
   },
   darkMode: {
     type: Boolean,
-    required: true
+    default: false
+  },
+  searchQuery: {
+    type: String,
+    default: ''
   }
 });
 
@@ -16,6 +20,11 @@ const emit = defineEmits(['open-tool', 'toggle-dark-mode']);
 
 // 搜索状态
 const searchQuery = ref('');
+
+// 同步props.searchQuery到本地状态
+watch(() => props.searchQuery, (newVal) => {
+  searchQuery.value = newVal;
+}, { immediate: true });
 
 // 工具数据
 const tools = ref([
@@ -65,7 +74,7 @@ const clearSearch = () => {
 </script>
 
 <template>
-  <div class="tool-grid-container">
+  <div class="tool-grid-container" :class="{ 'dark-mode': darkMode }">
     <!-- 集成 header -->
     <header class="header" v-if="category === 'all'">
       <div class="search-bar">
@@ -127,8 +136,11 @@ const clearSearch = () => {
       >
         <div class="tool-icon">
           <svg class="icon" viewBox="0 0 24 24" width="24" height="24">
-            <path d="M3 3h18v18H3zM14 8h.01M10 8h.01M10 12h.01M10 16h.01M14 12h.01M14 16h.01" v-if="tool.icon === 'password'" />
+            <!-- 密码管理器图标 - 锁形状 -->
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" v-if="tool.icon === 'password'" />
+            <!-- 二维码图标 -->
             <path d="M3 11h2v2H3v-2m8-6h2v12h-2V5m-4 8h2v4H7v-4m12-8h2v12h-2V5z" v-else-if="tool.icon === 'qrcode'" />
+            <!-- 默认图标 -->
             <rect x="4" y="4" width="16" height="16" v-else />
           </svg>
         </div>
@@ -150,6 +162,14 @@ const clearSearch = () => {
   flex: 1;
   overflow-y: auto;
   padding: var(--content-padding);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.tool-grid-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #ffffff;
 }
 
 .header {
